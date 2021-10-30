@@ -24,7 +24,9 @@
 #include "internal/dependent_false.hpp"
 #include <exception>
 #endif
-
+#if defined(CUSTOM_PARSE_ERROR)
+#include "custom_parse_error.hpp"
+#endif
 namespace TAO_PEGTL_NAMESPACE
 {
    template< typename Rule >
@@ -47,7 +49,9 @@ namespace TAO_PEGTL_NAMESPACE
       template< typename ParseInput, typename... States >
       [[noreturn]] static void raise( const ParseInput& in, States&&... /*unused*/ )
       {
-#if defined( __cpp_exceptions )
+#if defined(CUSTOM_PARSE_ERROR)
+         custom<Rule>::parse_error(in);
+#elif defined( __cpp_exceptions )
          throw parse_error( "parse error matching " + std::string( demangle< Rule >() ), in );
 #else
          static_assert( internal::dependent_false< Rule >, "exception support required for normal< Rule >::raise()" );
